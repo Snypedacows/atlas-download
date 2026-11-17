@@ -13,27 +13,72 @@
     background: linear-gradient(160deg, #0f172a, #1e293b); color: #e2e8f0; padding: 24px;
   }
   .card {
-    width: 100%; max-width: 380px; text-align: center; padding: 40px 32px;
+    width: 100%; max-width: 400px; text-align: center; padding: 40px 32px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
     border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
   }
   h1 { margin: 0 0 6px; font-size: 2.2rem; letter-spacing: 0.08em; }
   .sub { margin: 0 0 28px; color: #94a3b8; font-size: 1.05rem; }
+  input {
+    width: 100%; padding: 13px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.25); color: #e2e8f0; font-size: 1.1rem; text-align: center;
+    letter-spacing: 0.15em; margin-bottom: 14px;
+  }
   .btn {
-    display: inline-block; width: 100%; padding: 14px 20px; border-radius: 12px;
+    display: inline-block; width: 100%; padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer;
     background: #3b82f6; color: #fff; font-weight: 600; font-size: 1.05rem; text-decoration: none;
     transition: background 0.15s ease, transform 0.15s ease;
   }
   .btn:hover { background: #2563eb; transform: translateY(-1px); }
-  .note { margin: 16px 0 0; font-size: 0.85rem; color: #94a3b8; }
+  .err { margin: 12px 0 0; min-height: 1.2em; font-size: 0.9rem; color: #f87171; }
+  .note { margin: 18px 0 0; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+  .hidden { display: none; }
+  .flag { margin-top: 16px; font-size: 0.8rem; color: #fbbf24; line-height: 1.5; }
 </style>
 </head>
 <body>
   <main class="card">
     <h1>A.T.L.A.S.</h1>
     <p class="sub">Mac beta</p>
-    <a class="btn" href="./ATLAS-Beta-encrypted.dmg" download>Download</a>
-    <p class="note">macOS &bull; opens with the code you were given</p>
+
+    <section id="gate">
+      <input id="code" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter your code" aria-label="Access code">
+      <button class="btn" id="go">Unlock download</button>
+      <p class="err" id="err"></p>
+      <p class="note">Enter the code you were given to get the download.</p>
+    </section>
+
+    <section id="download" class="hidden">
+      <a class="btn" id="dl" href="#" download>Download A.T.L.A.S. (Mac beta)</a>
+      <p class="note">macOS &bull; Apple Silicon. This build is ad-hoc signed and not notarized. If macOS blocks the first open, right-click the app, choose Open, then Open again.</p>
+      <p class="flag">Unofficial Apple TV remote: it talks to Apple TV over reverse-engineered protocols (not an Apple API), so it can break on a tvOS update. Note: live PIN pairing is not wired up yet in this build &mdash; the app discovers and shows an Apple TV by name, but does not yet prompt for the 4-digit PIN or open a live session, so it will not drive a TV yet.</p>
+    </section>
   </main>
+
+<script>
+  // Soft gate only (no real auth). We store a one-way hash of the code, not the code itself.
+  const EXPECTED = "38d5e0c980beab84305e28a09c093cfd6c54c4162757268967458ef1ca78e868";
+  const DMG = "./38d5e0c980beab84305e28a09c093cfd6c54c4162757268967458ef1ca78e868/ATLAS-AppleTV-Beta.dmg";
+
+  async function sha256Hex(s) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  async function tryUnlock() {
+    const err = document.getElementById("err");
+    const code = document.getElementById("code").value.trim();
+    if (!code) { err.textContent = "Enter the code."; return; }
+    const h = await sha256Hex(code);
+    if (h === EXPECTED) {
+      document.getElementById("dl").href = DMG;
+      document.getElementById("gate").classList.add("hidden");
+      document.getElementById("download").classList.remove("hidden");
+    } else {
+      err.textContent = "That code didn't match. Try again.";
+    }
+  }
+  document.getElementById("go").addEventListener("click", tryUnlock);
+  document.getElementById("code").addEventListener("keydown", e => { if (e.key === "Enter") tryUnlock(); });
+</script>
 </body>
 </html>

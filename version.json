@@ -1,1 +1,1 @@
-{"name":"A.T.L.A.S.","channel":"beta","version":"0.1.0","dmg":"ATLAS-Beta-encrypted.dmg","released":"2026-11-17","note":"placeholder version until the real build version is known"}
+{"name":"A.T.L.A.S.","channel":"beta","version":"1.0.0","build":"1","dmg":"38d5e0c980beab84305e28a09c093cfd6c54c4162757268967458ef1ca78e868/ATLAS-AppleTV-Beta.dmg","gated":true,"released":"2026-11-17","note":"Apple TV remote beta. Download is behind a code gate on the page. Unofficial reverse-engineered Apple TV protocols; live PIN pairing not yet wired."}
